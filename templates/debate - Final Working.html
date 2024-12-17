@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Debate Bot - Debate</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            background-color: #000;
+            color: #fff;
+        }
+
+        #canvas_container {
+            width: 100%;
+            height: 100vh;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .timer {
+            font-size: 24px;
+            color: #f39c12;
+            margin-top: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .button-container,
+        .audio-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: rgba(78, 115, 223, 0.9);
+            color: #fff;
+            font-size: 16px;
+            font-weight: bold;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        button:hover {
+            background-color: rgba(55, 90, 127, 0.9);
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        audio {
+            outline: none;
+        }
+
+        .status-label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        .recording-status {
+            font-size: 18px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #27ae60;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+
+        .button-container1 {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    position: absolute;
+    bottom: 20px; /* Distance from the bottom */
+    right: 20px; /* Distance from the right */
+    margin-top: 0; /* Remove the default top margin */
+    z-index: 3; /* Ensure it appears above other elements */
+}
+
+.button-container1 button {
+    background-color: red; /* Change the background color to red */
+    color: #fff; /* Ensure text remains visible on the red background */
+    font-size: 16px;
+    font-weight: bold;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.button-container1 button:hover {
+    background-color: darkred; /* Slightly darker red on hover */
+    transform: scale(1.05);
+}
+
+.button-container1 button:active {
+    transform: scale(0.95);
+}
+
+
+    </style>
+</head>
+<body>
+    <div id="canvas_container"></div> <!-- Background animation container -->
+
+    <div class="content">
+        <h1>Debate Topic: {{ topic }}</h1>
+        <div class="timer" id="timer">02:00</div>
+
+        <div class="button-container">
+            <button onclick="startRecording()">Start Recording</button>
+            <button onclick="stopRecording()">Stop Recording</button>
+            <button onclick="submitAudio()">Submit Argument</button>
+        </div>
+        <div class = "button-container1">
+            <button onclick="endDebate()">End Debate</button> <!-- New button -->
+        </div>
+
+        <div class="audio-container">
+            <audio id="user-audio" controls></audio>
+            
+            <audio id="bot-response-audio" controls></audio> <span id="audio-status"></span>
+        </div>
+
+        <div class="recording-status" id="recording-status">Recording Status: Not Started</div>
+        <div class="status-label" id="submission-status">Audio Not Submitted</div>
+        
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.121.1/examples/js/controls/OrbitControls.js"></script>
+   
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            let mediaRecorder;
+            let audioChunks = [];
+            let timeLeft = 60*1; // 3 minutes countdown
+            let timerInterval;
+            
+            // Timer functionality
+            function startTimer() {
+                const timer = document.getElementById("timer");
+                timerInterval = setInterval(() => {
+                    if (timeLeft <= 0) {
+                        clearInterval(timerInterval);
+                        alert("The debate is over!");
+                        window.location.href = "/end_debate"; // Redirect to the winner page
+                    } else {
+                        const minutes = Math.floor(timeLeft / 60);
+                        const seconds = timeLeft % 60;
+                        timer.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+                        timeLeft--;
+                    }
+                }, 1000);
+            }
+        
+            // Start recording
+            function startRecording() {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+        
+                        document.getElementById("submission-status").style.display = "none";
+                        document.getElementById("audio-status").textContent = "";
+        
+                        // Change button color to indicate recording
+                        const recordButton = document.querySelector("button[onclick='startRecording()']");
+                        recordButton.style.backgroundColor = "red"; // Change to red when recording starts
+        
+                        // Disable submit button while recording
+                        const submitButton = document.querySelector("button[onclick='submitAudio()']");
+                        submitButton.disabled = true;
+        
+                        mediaRecorder.addEventListener("dataavailable", event => {
+                            audioChunks.push(event.data);
+                        });
+        
+                        mediaRecorder.addEventListener("stop", () => {
+                            const audioBlob = new Blob(audioChunks);
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            document.getElementById("user-audio").src = audioUrl;
+        
+                            // Reset the button color when recording stops
+                            const recordButton = document.querySelector("button[onclick='startRecording()']");
+                            recordButton.style.backgroundColor = ""; // Reset button color to default
+        
+                            // Enable submit button once audio is available
+                            const submitButton = document.querySelector("button[onclick='submitAudio()']");
+                            submitButton.disabled = false;
+                        });
+        
+                        document.getElementById("recording-status").textContent = "Recording Status: Recording Started";
+                    })
+                    .catch(err => {
+                        alert("Error accessing microphone: " + err);
+                    });
+            }
+        
+            // Stop recording
+            function stopRecording() {
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                    document.getElementById("recording-status").textContent = "Recording Status: Recording Stopped";
+                }
+            }
+        
+            // Submit audio
+            async function submitAudio() {
+                const submitButton = document.querySelector("button[onclick='submitAudio()']");
+                submitButton.disabled = true; // Disable submit button immediately
+        
+                const audioBlob = new Blob(audioChunks);
+                const formData = new FormData();
+                formData.append("topic", "{{ topic }}");
+                formData.append("audio", audioBlob, "user_audio.wav");
+        
+                try {
+                    const response = await fetch('/debate', { method: "POST", body: formData });
+        
+                    const submissionStatus = document.getElementById("submission-status");
+                    submissionStatus.textContent = "Audio Submitted Successfully!";
+                    submissionStatus.style.display = "block";
+        
+                    // Fetch the bot's response audio
+                    const blob = await response.blob();
+                    const audioUrl = URL.createObjectURL(blob);
+                    const botAudio = document.getElementById("bot-response-audio");
+                    botAudio.src = audioUrl;
+        
+                    // Change the entire background color of the bot audio player
+                    document.getElementById("audio-status").textContent = "Bot's response is ready!";
+        
+                    // Reset audio chunks for the next recording
+                    audioChunks = [];
+        
+                } catch (error) {
+                    alert("An error occurred: " + error.message);
+                    const submissionStatus = document.getElementById("submission-status");
+                    submissionStatus.textContent = "Submission Failed. Try Again!";
+                    submissionStatus.style.display = "block";
+        
+                } finally {
+                    submitButton.disabled = false; // Re-enable the submit button
+                }
+            }
+        
+            // Reset the color of the bot's audio player when it is played
+            document.getElementById("bot-response-audio").addEventListener("play", () => {
+                document.getElementById("audio-status").textContent = "";
+            });
+        
+            // Assign event listeners
+            document.querySelector("button[onclick='startRecording()']").onclick = startRecording;
+            document.querySelector("button[onclick='stopRecording()']").onclick = stopRecording;
+            document.querySelector("button[onclick='submitAudio()']").onclick = submitAudio;
+        
+            // Start the timer when the page loads
+            startTimer();
+        
+            // 3D Background animation using Three.js
+            let renderer, scene, camera, sphereBg, controls;
+            const container = document.getElementById("canvas_container");
+        
+            function init() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 1000);
+                camera.position.set(0, 0, 230);
+        
+                const light = new THREE.DirectionalLight("#fff", 2);
+                light.position.set(0, 50, -20);
+                scene.add(light);
+        
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                container.appendChild(renderer.domElement);
+        
+                const loader = new THREE.TextureLoader();
+                const texture = loader.load('https://i.ibb.co/4gHcRZD/bg3-je3ddz.jpg');
+                const geometry = new THREE.SphereGeometry(150, 40, 40);
+                const material = new THREE.MeshBasicMaterial({ map: texture, side: THREE.BackSide });
+                sphereBg = new THREE.Mesh(geometry, material);
+                scene.add(sphereBg);
+        
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.autoRotate = true;
+                controls.autoRotateSpeed = 2;
+        
+                window.addEventListener("resize", () => {
+                    camera.aspect = window.innerWidth / window.innerHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(window.innerWidth, window.innerHeight);
+                });
+            }
+        
+            function animate() {
+                requestAnimationFrame(animate);
+                sphereBg.rotation.y += 0.002;
+                controls.update();
+                renderer.render(scene, camera);
+            }
+        
+            init();
+            animate();
+        });
+
+        (function disableBackButton() {
+      history.pushState(null, null, location.href);
+      window.addEventListener('popstate', function (event) {
+          history.pushState(null, null, location.href);
+      });
+  })();
+
+  function endDebate() {
+    window.location.href = "/"; // Redirects to the home page
+}
+        </script>
+        
+
+</body>
+</html>

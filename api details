@@ -1,0 +1,6 @@
+# Set up Gemini API endpoint and load API key from environment variable
+GEMINI_API_URL = "https://api.gemini.google.com/v1/messages"  # Replace with actual URL if different
+GEMINI_API_KEY = "AIzaSyCDEm8zz2nYtX4ziR5Edl6kzbwcoz-Kvng"  # Ensure this environment variable is set
+new api key details 
+project debate ai 
+AIzaSyCX4TV1u09XHV_tSGhsT16WKx16gmNRCC8

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team and Age Group Selection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      color: #fff;
+    }
+
+    #canvas_container {
+      width: 100%;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    #content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    h1:first-child {
+      font-size: 3rem;
+      color: #4e73df;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    input, select, button {
+      width: 80%;
+      max-width: 350px;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    input {
+      text-align: center;
+    }
+
+    button {
+      background-color: #4e73df;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #375a7f;
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      h3 {
+        font-size: 1.2rem;
+      }
+
+      input, select, button {
+        width: 90%;
+        font-size: 1rem;
+      }
+
+      #content {
+        width: 95%;
+        max-width: none;
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      h3 {
+        font-size: 1rem;
+      }
+
+      input, select, button {
+        font-size: 0.9rem;
+      }
+
+      #content {
+        width: 95%;
+        padding: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="canvas_container"></div>
+
+  <div id="content">
+    <h1>AI Debate</h1>
+    <h1>Team Registration</h1>
+    <h3>Enter your team details:</h3>
+    <input type="number" id="teamNumber" placeholder="Enter team number (1-10)" min="1" max="10">
+    <select id="ageGroup">
+      <option value="">-- Select Age Group --</option>
+      <option value="6-10">6 to 10</option>
+      <option value="11-14">11 to 14</option>
+    </select>
+    <button onclick="submitDetails()">Submit</button>
+  </div>
+
+  <script>
+    function submitDetails() {
+      const teamNumber = document.getElementById("teamNumber").value;
+      const ageGroup = document.getElementById("ageGroup").value;
+
+      // Validate inputs
+      if (!teamNumber || teamNumber < 1 || teamNumber > 10) {
+        alert("Please enter a valid team number between 1 and 10.");
+        return;
+      }
+
+      if (!ageGroup) {
+        alert("Please select an age group.");
+        return;
+      }
+
+      // Redirect to the quiz endpoint with the team number and age group
+      const url = `/quiz/${teamNumber}?age_group=${encodeURIComponent(ageGroup)}`;
+      window.location.href = url;
+    }
+  </script>
+</body>
+</html>

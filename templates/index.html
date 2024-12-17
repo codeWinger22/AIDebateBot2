@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Space Globe and Debate Bot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      margin: 0;
+      overflow: hidden;
+      width: 100vw;
+      height: 100vh;
+      background-color: #000;
+      color: #fff;
+    }
+
+    #canvas_container {
+      width: 100%;
+      height: 100vh;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 1;
+    }
+
+    #content {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 2;
+      text-align: center;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    h3 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+
+    select {
+      width: 80%;
+      max-width: 350px;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ced4da;
+      border-radius: 5px;
+      font-size: 16px;
+      color: #495057;
+    }
+
+    button {
+      width: 80%;
+      max-width: 350px;
+      background-color: #4e73df;
+      color: #fff;
+      font-size: 1.2rem;
+      font-weight: 700;
+      padding: 12px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #375a7f;
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.95);
+    }
+
+    /* Media Queries for Responsive Design */
+    @media (max-width: 768px) {
+      h1 {
+        font-size: 2rem;
+      }
+
+      h3 {
+        font-size: 1.2rem;
+      }
+
+      select, button {
+        width: 90%;
+        font-size: 1rem;
+      }
+
+      #content {
+        width: 95%;
+        max-width: none;
+        padding: 15px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      h3 {
+        font-size: 1rem;
+      }
+
+      select, button {
+        font-size: 0.9rem;
+      }
+
+      #content {
+        width: 95%;
+        padding: 10px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div id="canvas_container"></div>
+
+  <div id="content">
+    <h1>AI Voice Debate Bot</h1>
+    <h3>Select a topic to start the debate:</h3>
+    <select id="topic">
+      <option value="">-- Select Topic --</option>
+      <option value="Should animals be kept in zoos?">Should animals be kept in zoos?</option>
+      <option value="Is homework necessary for learning?">Is homework necessary for learning?</option>
+      <option value="Should school uniforms be mandatory?">Should school uniforms be mandatory?</option>
+      <option value="Is social media harmful to teenagers?">Is social media harmful to teenagers?</option>
+    </select>
+    <button onclick="startDebate()">Proceed to Debate</button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.121.1/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.121.1/examples/js/controls/OrbitControls.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/simplex-noise/2.4.0/simplex-noise.min.js"></script>
+  <script>
+    let renderer,
+      scene,
+      camera,
+      sphereBg,
+      nucleus,
+      stars,
+      controls,
+      container = document.getElementById("canvas_container"),
+      noise = new SimplexNoise(),
+      blobScale = 3;
+
+    init();
+    animate();
+
+    function init() {
+      scene = new THREE.Scene();
+
+      camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.01, 1000);
+      camera.position.set(0, 0, 230);
+
+      const directionalLight = new THREE.DirectionalLight("#fff", 2);
+      directionalLight.position.set(0, 50, -20);
+      scene.add(directionalLight);
+
+      let ambientLight = new THREE.AmbientLight("#ffffff", 1);
+      ambientLight.position.set(0, 20, 20);
+      scene.add(ambientLight);
+
+      renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+      renderer.setSize(container.clientWidth, container.clientHeight);
+      renderer.setPixelRatio(window.devicePixelRatio);
+      container.appendChild(renderer.domElement);
+
+      controls = new THREE.OrbitControls(camera, renderer.domElement);
+      controls.autoRotate = true;
+      controls.autoRotateSpeed = 4;
+      controls.maxDistance = 350;
+      controls.minDistance = 150;
+      controls.enablePan = false;
+
+      const loader = new THREE.TextureLoader();
+      const textureSphereBg = loader.load('https://i.ibb.co/4gHcRZD/bg3-je3ddz.jpg');
+      const texturenucleus = loader.load('https://i.ibb.co/hcN2qXk/star-nc8wkw.jpg');
+
+      let icosahedronGeometry = new THREE.IcosahedronGeometry(30, 10);
+      let lambertMaterial = new THREE.MeshPhongMaterial({ map: texturenucleus });
+      nucleus = new THREE.Mesh(icosahedronGeometry, lambertMaterial);
+      scene.add(nucleus);
+
+      textureSphereBg.anisotropy = 16;
+      let geometrySphereBg = new THREE.SphereBufferGeometry(150, 40, 40);
+      let materialSphereBg = new THREE.MeshBasicMaterial({
+        side: THREE.BackSide,
+        map: textureSphereBg,
+      });
+      sphereBg = new THREE.Mesh(geometrySphereBg, materialSphereBg);
+      scene.add(sphereBg);
+    }
+
+    function animate() {
+      nucleus.rotation.y += 0.002;
+      sphereBg.rotation.x += 0.002;
+      sphereBg.rotation.y += 0.002;
+      sphereBg.rotation.z += 0.002;
+
+      controls.update();
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+
+    window.addEventListener("resize", () => {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight);
+    });
+
+    function startDebate() {
+      const topic = document.getElementById("topic").value;
+      if (!topic) {
+        alert("Please select a topic.");
+        return;
+      }
+      window.location.href = `/debate?topic=${encodeURIComponent(topic)}`;
+    }
+
+    (function disableBackButton() {
+      history.pushState(null, null, location.href);
+      window.addEventListener('popstate', function (event) {
+        history.pushState(null, null, location.href);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Debate Bot</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        h1 { color: #2e3b4e; font-size: 36px; margin-bottom: 20px; }
+        select, button { padding: 10px 20px; font-size: 16px; margin: 10px; }
+        .audio-container { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        #user-audio, #bot-response-audio { width: 300px; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>AI Voice Debate Bot</h1>
+    <h3 id="topic-label">Select a topic to start the debate:</h3>
+    <select id="topic" onchange="showSelectedTopic()" style="display: inline;">
+        {% for topic in topics %}
+            <option value="{{ topic }}">{{ topic }}</option>
+        {% endfor %}
+    </select>
+    <div id="selected-topic" style="display: none; font-size: 18px; font-weight: bold;"></div>
+
+    <div class="button-container">
+        <button onclick="startRecording()">Start Recording</button>
+        <button onclick="stopRecording()">Stop Recording</button>
+        <button onclick="submitAudio()">Submit Argument</button>
+    </div>
+    <div class="audio-container">
+        <audio id="user-audio" controls></audio>
+        <audio id="bot-response-audio" controls></audio>
+    </div>
+    <footer>&copy; 2024 AI Voice Debate Bot | Powered by AI & Speech Recognition</footer>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let selectedTopic;
+
+        function showSelectedTopic() {
+            selectedTopic = document.getElementById("topic").value;
+            document.getElementById("selected-topic").textContent = "Debate Topic: " + selectedTopic;
+            document.getElementById("selected-topic").style.display = "block";
+            document.getElementById("topic").style.display = "none";
+            document.getElementById("topic-label").style.display = "none";
+        }
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    mediaRecorder.addEventListener("dataavailable", event => { audioChunks.push(event.data); });
+                    mediaRecorder.addEventListener("stop", () => {
+                        const audioBlob = new Blob(audioChunks);
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        document.getElementById("user-audio").src = audioUrl;
+                    });
+                })
+                .catch(err => { alert("Error accessing microphone: " + err); });
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+        }
+
+        async function submitAudio() {
+            if (!selectedTopic) {
+                alert("Please select a topic before submitting.");
+                return;
+            }
+            if (audioChunks.length === 0) {
+                alert("Please record an argument before submitting.");
+                return;
+            }
+
+            const audioBlob = new Blob(audioChunks);
+            const formData = new FormData();
+            formData.append("topic", selectedTopic);
+            formData.append("audio", audioBlob, "user_audio.wav");
+
+            try {
+                const response = await fetch('/debate', { method: "POST", body: formData });
+                if (!response.ok) throw new Error('Failed to get AI response.');
+                const blob = await response.blob();
+                const audioUrl = URL.createObjectURL(blob);
+                document.getElementById("bot-response-audio").src = audioUrl;
+                audioChunks = [];  // Clear previous audio chunks for next round
+            } catch (error) {
+                alert("An error occurred: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+last working debate.html code 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Debate Bot - Debate</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f4f9; color: #333; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+        h1 { color: #2e3b4e; font-size: 24px; margin-bottom: 10px; }
+        .button-container, .audio-container { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+        .timer { font-size: 24px; color: #e74c3c; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>Debate Topic: {{ topic }}</h1>
+    <div class="timer" id="timer">01:00</div>
+
+    <div class="button-container">
+        <button onclick="startRecording()">Start Recording</button>
+        <button onclick="stopRecording()">Stop Recording</button>
+        <button onclick="submitAudio()">Submit Argument</button>
+    </div>
+
+    <div class="audio-container">
+        <audio id="user-audio" controls></audio>
+        <audio id="bot-response-audio" controls></audio>
+    </div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let timeLeft = 60; // 30 minutes in seconds
+
+        function startTimer() {
+            const timer = document.getElementById("timer");
+            const countdown = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    alert("The debate is over!");
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timer.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    mediaRecorder.addEventListener("dataavailable", event => { audioChunks.push(event.data); });
+                    mediaRecorder.addEventListener("stop", () => {
+                        const audioBlob = new Blob(audioChunks);
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        document.getElementById("user-audio").src = audioUrl;
+                    });
+                })
+                .catch(err => { alert("Error accessing microphone: " + err); });
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+            }
+        }
+
+        async function submitAudio() {
+            const audioBlob = new Blob(audioChunks);
+            const formData = new FormData();
+            formData.append("topic", "{{ topic }}");
+            formData.append("audio", audioBlob, "user_audio.wav");
+
+            try {
+                const response = await fetch('/debate', { method: "POST", body: formData });
+                const blob = await response.blob();
+                const audioUrl = URL.createObjectURL(blob);
+                document.getElementById("bot-response-audio").src = audioUrl;
+                audioChunks = [];
+            } catch (error) {
+                alert("An error occurred: " + error.message);
+            }
+        }
+
+        startTimer();
+    </script>
+</body>
+</html>
+
+
+
+
+this is the latest code before changing the code for UI upgradation 
+index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Debate Bot - Select Topic</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 { color: #2e3b4e; font-size: 36px; margin-bottom: 20px; }
+        select, button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Select Your Debate Topic</h1>
+    <h3>Select a topic to start the debate:</h3>
+    <select id="topic">
+        <option value="">-- Select Topic --</option>
+        <option>Should animals be kept in zoos?</option>
+        <option>Is homework necessary for learning?</option>
+        <option>Should school uniforms be mandatory?</option>
+        <option>Is social media harmful to teenagers?</option>
+    </select>
+    <button onclick="startDebate()">Proceed to Debate</button>
+
+    <script>
+        function startDebate() {
+            const topic = document.getElementById("topic").value;
+            if (!topic) {
+                alert("Please select a topic.");
+                return;
+            }
+            window.location.href = `/debate?topic=${encodeURIComponent(topic)}`;
+        }
+    </script>
+</body>
+</html>
+
+
+
+<debate class="html"><!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>AI Voice Debate Bot - Debate</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f9;
+                color: #333;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                height: 100vh;
+                margin: 0;
+            }
+            h1 {
+                color: #2e3b4e;
+                font-size: 24px;
+                margin-bottom: 10px;
+            }
+            .button-container,
+            .audio-container {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+                align-items: center;
+            }
+            .timer {
+                font-size: 24px;
+                color: #e74c3c;
+                margin-top: 20px;
+            }
+            .status-label {
+                font-size: 18px;
+                font-weight: bold;
+                margin-top: 10px;
+                color: #27ae60;
+            }
+            .status-label.error {
+                color: #e74c3c;
+            }
+            .recording-status {
+                font-size: 18px;
+                margin-top: 10px;
+                font-weight: bold;
+                color: #2e3b4e;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Debate Topic: {{ topic }}</h1>
+        <div class="timer" id="timer">01:00</div>
+    
+        <div class="button-container">
+            <button onclick="startRecording()">Start Recording</button>
+            <button onclick="stopRecording()">Stop Recording</button>
+            <button onclick="submitAudio()">Submit Argument</button>
+        </div>
+    
+        <div class="audio-container">
+            <audio id="user-audio" controls></audio>
+            <audio id="bot-response-audio" controls></audio>
+        </div>
+    
+        <!-- Recording Status Label -->
+        <div class="recording-status" id="recording-status">Recording Status: Not Started</div>
+    
+        <!-- Submission Status Label -->
+        <div class="status-label" id="submission-status">Audio Not Submitted</div>
+    
+        <script>
+            let mediaRecorder;
+            let audioChunks = [];
+            let timeLeft = 60; // 30 minutes in seconds
+    
+            function startTimer() {
+                const timer = document.getElementById("timer");
+                const countdown = setInterval(() => {
+                    if (timeLeft <= 0) {
+                        clearInterval(countdown);
+                        alert("The debate is over!");
+                    } else {
+                        const minutes = Math.floor(timeLeft / 60);
+                        const seconds = timeLeft % 60;
+                        timer.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+                        timeLeft--;
+                    }
+                }, 1000);
+            }
+    
+            function startRecording() {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+                        mediaRecorder.addEventListener("dataavailable", event => {
+                            audioChunks.push(event.data);
+                        });
+                        mediaRecorder.addEventListener("stop", () => {
+                            const audioBlob = new Blob(audioChunks);
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            document.getElementById("user-audio").src = audioUrl;
+                        });
+    
+                        // Update the recording status label
+                        document.getElementById("recording-status").textContent = "Recording Status: Recording Started";
+                    })
+                    .catch(err => {
+                        alert("Error accessing microphone: " + err);
+                    });
+            }
+    
+            function stopRecording() {
+                if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                    mediaRecorder.stop();
+                    // Update the recording status label
+                    document.getElementById("recording-status").textContent = "Recording Status: Recording Stopped";
+                }
+            }
+    
+            async function submitAudio() {
+                const audioBlob = new Blob(audioChunks);
+                const formData = new FormData();
+                formData.append("topic", "{{ topic }}");
+                formData.append("audio", audioBlob, "user_audio.wav");
+    
+                try {
+                    const response = await fetch('/debate', { method: "POST", body: formData });
+                    const blob = await response.blob();
+                    const audioUrl = URL.createObjectURL(blob);
+                    document.getElementById("bot-response-audio").src = audioUrl;
+    
+                    // Clear the audio chunks and update the submission status label
+                    audioChunks = [];
+                    document.getElementById("submission-status").textContent = "Audio Submitted Successfully!";
+                } catch (error) {
+                    alert("An error occurred: " + error.message);
+                    document.getElementById("submission-status").textContent = "Submission Failed. Try Again!";
+                    document.getElementById("submission-status").classList.add("error");
+                }
+            }
+    
+            startTimer();
+        </script>
+    </body>
+    </html>
+    </debate>
+
+
+
+
+
+    28/11
+    <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Debate Bot - Select Topic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(to right, #4e73df, #1cc88a);
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+
+        .container {
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        h1 {
+            color: #2e3b4e;
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        h3 {
+            color: #6c757d;
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+
+        select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 16px;
+            color: #495057;
+        }
+
+        button {
+            width: 100%;
+            background-color: #4e73df;
+            color: #fff;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 12px;
+            margin-top: 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #375a7f;
+            transform: scale(1.05);
+        }
+
+        button:active {
+            transform: scale(0.95);
+        }
+
+        select, button {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Voice Debate Bot</h1>
+        <h3>Select a topic to start the debate:</h3>
+        <select id="topic">
+            <option value="">-- Select Topic --</option>
+            <option>Should animals be kept in zoos?</option>
+            <option>Is homework necessary for learning?</option>
+            <option>Should school uniforms be mandatory?</option>
+            <option>Is social media harmful to teenagers?</option>
+        </select>
+        <button onclick="startDebate()">Proceed to Debate</button>
+    </div>
+
+    <script>
+        function startDebate() {
+            const topic = document.getElementById("topic").value;
+            if (!topic) {
+                alert("Please select a topic.");
+                return;
+            }
+            window.location.href = `/debate?topic=${encodeURIComponent(topic)}`;
+        }
+    </script>
+</body>
+</html>
+
+
+debate.py 28/11
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Debate Bot - Debate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #2e3b4e;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .button-container,
+        .audio-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        .timer {
+            font-size: 24px;
+            color: #e74c3c;
+            margin-top: 20px;
+        }
+        .status-label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #27ae60;
+        }
+        .status-label.error {
+            color: #e74c3c;
+        }
+        .recording-status {
+            font-size: 18px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #2e3b4e;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debate Topic: {{ topic }}</h1>
+    <div class="timer" id="timer">01:00</div>
+
+    <div class="button-container">
+        <button onclick="startRecording()">Start Recording</button>
+        <button onclick="stopRecording()">Stop Recording</button>
+        <button onclick="submitAudio()">Submit Argument</button>
+    </div>
+
+    <div class="audio-container">
+        <audio id="user-audio" controls></audio>
+        <audio id="bot-response-audio" controls></audio>
+    </div>
+
+    <!-- Recording Status Label -->
+    <div class="recording-status" id="recording-status">Recording Status: Not Started</div>
+
+    <!-- Submission Status Label -->
+    <div class="status-label" id="submission-status">Audio Not Submitted</div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let timeLeft = 60; // 30 minutes in seconds
+
+        function startTimer() {
+            const timer = document.getElementById("timer");
+            const countdown = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    alert("The debate is over!");
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timer.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+                    mediaRecorder.addEventListener("stop", () => {
+                        const audioBlob = new Blob(audioChunks);
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        document.getElementById("user-audio").src = audioUrl;
+                    });
+
+                    // Update the recording status label
+                    document.getElementById("recording-status").textContent = "Recording Status: Recording Started";
+                })
+                .catch(err => {
+                    alert("Error accessing microphone: " + err);
+                });
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+                // Update the recording status label
+                document.getElementById("recording-status").textContent = "Recording Status: Recording Stopped";
+            }
+        }
+
+        async function submitAudio() {
+            const audioBlob = new Blob(audioChunks);
+            const formData = new FormData();
+            formData.append("topic", "{{ topic }}");
+            formData.append("audio", audioBlob, "user_audio.wav");
+
+            try {
+                const response = await fetch('/debate', { method: "POST", body: formData });
+                const blob = await response.blob();
+                const audioUrl = URL.createObjectURL(blob);
+                document.getElementById("bot-response-audio").src = audioUrl;
+
+                // Clear the audio chunks and update the submission status label
+                audioChunks = [];
+                document.getElementById("submission-status").textContent = "Audio Submitted Successfully!";
+            } catch (error) {
+                alert("An error occurred: " + error.message);
+                document.getElementById("submission-status").textContent = "Submission Failed. Try Again!";
+                document.getElementById("submission-status").classList.add("error");
+            }
+        }
+
+        startTimer();
+    </script>
+</body>
+</html>
+
+
+
+
+
+debate 29/11
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Voice Debate Bot - Debate</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #2e3b4e;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .button-container,
+        .audio-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        .timer {
+            font-size: 24px;
+            color: #e74c3c;
+            margin-top: 20px;
+        }
+        .status-label {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #27ae60;
+        }
+        .status-label.error {
+            color: #e74c3c;
+        }
+        .recording-status {
+            font-size: 18px;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #2e3b4e;
+        }
+    </style>
+</head>
+<body>
+    <h1>Debate Topic: {{ topic }}</h1>
+    <div class="timer" id="timer">01:00</div>
+
+    <div class="button-container">
+        <button onclick="startRecording()">Start Recording</button>
+        <button onclick="stopRecording()">Stop Recording</button>
+        <button onclick="submitAudio()">Submit Argument</button>
+    </div>
+
+    <div class="audio-container">
+        <audio id="user-audio" controls></audio>
+        <audio id="bot-response-audio" controls></audio>
+    </div>
+
+    <!-- Recording Status Label -->
+    <div class="recording-status" id="recording-status">Recording Status: Not Started</div>
+
+    <!-- Submission Status Label -->
+    <div class="status-label" id="submission-status">Audio Not Submitted</div>
+
+    <script>
+        let mediaRecorder;
+        let audioChunks = [];
+        let timeLeft = 60; // 30 minutes in seconds
+
+        function startTimer() {
+            const timer = document.getElementById("timer");
+            const countdown = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    alert("The debate is over!");
+                } else {
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    timer.textContent = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+                    timeLeft--;
+                }
+            }, 1000);
+        }
+
+        function startRecording() {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+                    mediaRecorder.addEventListener("stop", () => {
+                        const audioBlob = new Blob(audioChunks);
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        document.getElementById("user-audio").src = audioUrl;
+                    });
+
+                    // Update the recording status label
+                    document.getElementById("recording-status").textContent = "Recording Status: Recording Started";
+                })
+                .catch(err => {
+                    alert("Error accessing microphone: " + err);
+                });
+        }
+
+        function stopRecording() {
+            if (mediaRecorder && mediaRecorder.state !== "inactive") {
+                mediaRecorder.stop();
+                // Update the recording status label
+                document.getElementById("recording-status").textContent = "Recording Status: Recording Stopped";
+            }
+        }
+
+        async function submitAudio() {
+            const audioBlob = new Blob(audioChunks);
+            const formData = new FormData();
+            formData.append("topic", "{{ topic }}");
+            formData.append("audio", audioBlob, "user_audio.wav");
+
+            try {
+                const response = await fetch('/debate', { method: "POST", body: formData });
+                const blob = await response.blob();
+                const audioUrl = URL.createObjectURL(blob);
+                document.getElementById("bot-response-audio").src = audioUrl;
+
+                // Clear the audio chunks and update the submission status label
+                audioChunks = [];
+                document.getElementById("submission-status").textContent = "Audio Submitted Successfully!";
+            } catch (error) {
+                alert("An error occurred: " + error.message);
+                document.getElementById("submission-status").textContent = "Submission Failed. Try Again!";
+                document.getElementById("submission-status").classList.add("error");
+            }
+        }
+
+        startTimer();
+    </script>
+</body>
+</html>

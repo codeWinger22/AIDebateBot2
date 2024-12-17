@@ -1,0 +1,681 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI DEBATE</title>
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+<style>
+       .meter {
+            height: 20px;
+            background-color: lightgray;
+        }
+        .meter-fill {
+            height: 100%;
+            background-color: green;
+            width: {{ trust_score }}%;
+        }
+  /* Styles for the computer object */
+  @keyframes type {
+      0% {
+          width: 0px;
+      }
+      20% {
+          width: 30%;
+      }
+      100% {
+          width: 100px;
+      }
+  }
+
+  @-webkit-keyframes type {
+    0% {
+      width: 0px;
+    }
+    20% {
+      width: 30%; /* Reduced width */
+    }
+    100% {
+      width: 100px; /* Reduced width */
+    }
+  }
+  @keyframes type_two {
+    0% {
+      width: 0px;
+    }
+    20% {
+      width: 0px;
+    }
+    40% {
+      width: 30%; /* Reduced width */
+    }
+    100% {
+      width: 100px; /* Reduced width */
+    }
+  }
+  @-webkit-keyframes type_two {
+    0% {
+      width: 0px;
+    }
+    20% {
+      width: 0px;
+    }
+    40% {
+      width: 30%; /* Reduced width */
+    }
+    100% {
+      width: 100px; /* Reduced width */
+    }
+  }
+  @keyframes type_three {
+    0% {
+      width: 0px;
+    }
+    40% {
+      width: 0px;
+    }
+    60% {
+      width: 30%; /* Reduced width */
+    }
+    100% {
+      width: 100px; /* Reduced width */
+    }
+  }
+  @-webkit-keyframes type_three {
+    0% {
+      width: 0px;
+    }
+    40% {
+      width: 0px;
+    }
+    60% {
+      width: 30%; /* Reduced width */
+    }
+    100% {
+      width: 100px; /* Reduced width */
+    }
+  }
+  @keyframes type_four {
+    0% {
+      width: 0px;
+    }
+    60% {
+      width: 0px;
+    }
+    80% {
+      width: 100px; /* Reduced width */
+    }
+    100% {
+      width: 100px; /* Reduced width */
+    }
+  }
+  @-webkit-keyframes type_four {
+    0% {
+      width: 0px;
+    }
+    60% {
+      width: 0px;
+    }
+    80% {
+      width: 100px; /* Reduced width */
+    }
+    100% {
+      width: 100px; /* Reduced width */
+    }
+  }
+ 
+  body {
+    background-color: #181B20;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    z-index: -1;
+}
+
+#computer {
+    border-width: 0;
+    top: 70px;
+    width: 100px;
+    left: 50px;
+    position: absolute;
+    z-index: 1;
+    margin-right: 100%;
+}
+  #computer > div {
+    position: absolute;
+  }
+  #computer #front {
+    width: 60px;
+    top: 54px;
+    width: 150px;
+    height: 150px;
+    -webkit-transform: skew(-10deg, 10deg);
+    transform: skew(-10deg, 10deg);
+    background-color: #A39A9A;
+  }
+  #computer #screen {
+    top: 70px;
+    left: 10px;
+    width: 130px;
+    height: 110px;
+    border-radius: 3px;
+    background-color: black;
+    -webkit-transform: skew(-10deg, 10deg);
+    transform: skew(-10deg, 10deg);
+  }
+  #computer #text {
+    padding: 5px;
+    font-size: 12pt;
+    top: 80px;
+    left: 20px;
+    width: 270px;
+    color: white;
+    height: 65px;
+    -webkit-transform: skew(-10deg, 10deg);
+    transform: skew(-10deg, 10deg);
+    font-family: monospace;
+  }
+  #computer #text div {
+    width: 0px;
+    overflow: hidden;
+    max-height: 19px;
+  }
+  #computer #text div:nth-child(1) {
+    -webkit-animation: type 10s linear infinite;
+    animation: type 10s linear infinite;
+    overflow: hidden;
+  }
+  #computer #text div:nth-child(2) {
+    -webkit-animation: type_two 10s linear infinite;
+    animation: type_two 10s linear infinite;
+    overflow: hidden;
+  }
+  #computer #text div:nth-child(3) {
+    -webkit-animation: type_three 10s linear infinite;
+    animation: type_three 10s linear infinite;
+    overflow: hidden;
+  }
+  #computer #text div:nth-child(4) {
+    -webkit-animation: type_four 10s linear infinite;
+    animation: type_four 10s linear infinite;
+    overflow: hidden;
+  }
+  #computer #side {
+    height: 150px;
+    width: 100px;
+    background-color: #333;
+    top: 40px;
+    left: 150px;
+    -webkit-transform: skew(-10deg, -30deg);
+    transform: skew(-10deg, -30deg);
+  }
+  #computer #top {
+    background-color: #797979;
+    width: 153px;
+    height: 56px;
+    left: 60px;
+    -webkit-transform: skew(-60deg, 10deg);
+    transform: skew(-60deg, 10deg);
+  }
+  #computer #button {
+    -webkit-transform: skew(-10deg, 10deg);
+    transform: skew(-10deg, 10deg);
+    background-color: #242F45;
+    height: 10px;
+    width: 40px;
+    top: 180px;
+  }
+
+  h1 {
+    position: absolute;
+    margin: 0;
+    left: 50%;
+    top: 60px;
+    transform: translate(-50%, -50%);
+    color: #fff;
+    font: Helvetica;
+    animation: myfirst 5s linear 2s infinite alternate;
+}
+  
+  @keyframes myfirst {
+    0%   { left:670px; top:60px;}
+    25%  { left:730px; top:60px;}
+    50%  { left:670px; top:60px;}
+    75%   {left:730px; top:60px;}
+    100% { left:670px; top:60px;}
+  }
+
+
+  .grid { 
+    display: grid;
+  
+    
+    grid-template-columns: repeat(3, minmax(30px, 1fr));
+  
+    grid-gap: 20px;
+    align-items: stretch;
+    margin-top:250px;
+    margin-left : 170px;
+    width : 900px;
+    height : 500px;
+    }
+  .grid > article {
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    box-shadow: 2px 2px 6px 0px  rgba(0,0,0,0.3);
+  }
+ 
+  .grid > article img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px; /* Apply border-radius directly to the image */
+    border: 1px solid #ccc; /* Apply border directly to the image */
+    box-shadow: 2px 2px 6px 0px rgba(0, 0, 0, 0.3);
+}
+
+.grid > article .btn {
+  width: 80%; /* Adjust width as needed */
+  margin-bottom :10px;
+ 
+}
+  h5{
+    color :#fff;
+    
+  }
+  P{
+    padding : 4px;
+    color : #C0C0C0;
+    
+  }
+
+
+
+
+
+
+
+
+
+
+
+  *{
+    margin: 0;
+    padding: 0;
+  }
+ 
+  @-webkit-keyframes snow {
+    0% { opacity: 0; transform: translateY(0px); }
+    20%{ opacity: 1;}
+    100% { opacity: 1; transform: translateY(650px); }
+  }
+  @-moz-keyframes snow {
+    0% { opacity: 0; transform: translateY(0px); }
+    20%{ opacity: 1;}
+    100% { opacity: 1; transform: translateY(650px); }
+  }
+  @keyframes snow {
+    0% { opacity: 0; transform: translateY(0px); }
+    20%{ opacity: 1;}
+    100% { opacity: 1; transform: translateY(650px); }
+  }
+  @-webkit-keyframes astronaut{
+    0%{
+      transform: rotate(0deg);
+    }
+    100%{
+      transform: rotate(360deg);
+    }
+  }
+  .box-of-star1,
+  .box-of-star2,
+  .box-of-star3,
+  .box-of-star4{
+    width: 100%;
+    position: absolute;
+    z-index: 10;
+    left: 0;
+    transform: translateY(650px);
+  }
+  .box-of-star1{
+    -webkit-animation: snow 5s linear infinite;
+  }
+  .box-of-star2{
+    -webkit-animation: snow 5s -1.64s linear infinite;
+  }
+  .box-of-star3{
+    -webkit-animation: snow 5s -2.30s linear infinite;
+  }
+  .box-of-star4{
+    -webkit-animation: snow 5s -3.30s linear infinite;
+  }
+  .star{
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background-color: #FFF;
+    position: absolute;
+    z-index: 10;
+    opacity: .7;
+  }
+  .star:before{
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #FFF;
+    position: absolute;
+    z-index: 10;
+    top: 40px;
+    left: 70px;
+    opacity: .7;
+  }
+  .star:after{
+    content: "";
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #FFF;
+    position: absolute;
+    z-index: 10;
+    top: 8px;
+    left: 170px;
+    opacity: .9;
+  }
+  .star-position1{
+    top: 30px;
+    left: 20px;
+  }
+  .star-position2{
+    top: 110px;
+    left: 250px;
+  }
+  .star-position3{
+    top: 60px;
+    left: 570px;
+  }
+  .star-position4{
+    top: 120px;
+    left: 900px;
+  }
+  .star-position5{
+    top: 20px;
+    left: 1120px;
+  }
+  .star-position6{
+    top: 90px;
+    left: 1280px;
+  }
+  .star-position7{
+    top: 30px;
+    left: 1480px;
+  }
+
+  
+
+
+.box {
+  width: 40%;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.2);
+  padding: 35px;
+  border: 2px solid #fff;
+  border-radius: 20px/50px;
+  background-clip: padding-box;
+  text-align: center;
+}
+
+
+
+.overlay {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0, 0, 0, 0.7);
+  transition: opacity 500ms;
+  visibility: hidden;
+  opacity: 0;
+}
+.overlay:target {
+  visibility: visible;
+  opacity: 1;
+}
+
+.popup {
+  margin: 70px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 5px;
+  width: 30%;
+  position: relative;
+  transition: all 5s ease-in-out;
+}
+
+.popup h2 {
+  margin-top: 0;
+  color: #333;
+  font-family: Tahoma, Arial, sans-serif;
+}
+.popup .close {
+  position: absolute;
+  top: 20px;
+  right: 30px;
+  transition: all 200ms;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration: none;
+  color: #333;
+}
+.popup .close:hover {
+  color: #06D85F;
+}
+.popup .content {
+  max-height: 30%;
+  overflow: auto;
+}
+@media screen and (max-width: 992px) {
+  #computer {
+      top: 30px;
+      left: 20px;
+      width: 80px;
+  }
+
+  h1 {
+      font-size: 1.5em;
+  }
+
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 150px; /* Increased padding-top */
+    margin-left: 5px;
+    width: 90%;
+}
+
+  .grid>article {
+      flex: 1 0 calc(33.333% - 20px);
+      margin: 10px;
+  }
+
+  .grid>article img {
+      width: 100%;
+  }
+
+  .box {
+      width: 90%;
+  }
+
+  .popup {
+      width: 90%;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  #computer {
+      top: 20px;
+      left: 10px;
+      width: 60px;
+  }
+
+  h1 {
+      font-size: 1.2em;
+  }
+
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 100px; /* Increased padding-top */
+    margin-left: 5px;
+    width: 90%;
+    margin-top: 50px; /* Added margin-top */
+}
+
+  .grid>article {
+      flex: 1 0 calc(50% - 20px);
+      margin: 10px;
+  }
+
+  .box {
+      width: 95%;
+  }
+
+  .popup {
+      width: 95%;
+  }
+}
+
+@media screen and (max-width: 576px) {
+  #computer {
+      top: 10px;
+      left: 5px;
+      width: 50px;
+  }
+
+  h1 {
+      font-size: 1em;
+  }
+
+  .grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding-top: 200px; /* Increased padding-top */
+    margin-left: 5px;
+    width: 90%;
+    margin-top: 50px; /* Added margin-top */
+}
+
+  .grid>article {
+      flex: 1 0 calc(100% - 20px);
+      margin: 10px;
+  }
+
+  .box {
+      width: 98%;
+  }
+
+  .popup {
+      width: 98%;
+  }
+}
+
+  
+</style>
+
+</head>
+<body>
+<!-- Computer object -->
+<div class="box-of-star1">
+  <div class="star star-position1"></div>
+  <div class="star star-position2"></div>
+  <div class="star star-position3"></div>
+  <div class="star star-position4"></div>
+  <div class="star star-position5"></div>
+  <div class="star star-position6"></div>
+  <div class="star star-position7"></div>
+</div>
+<div class="box-of-star2">
+  <div class="star star-position1"></div>
+  <div class="star star-position2"></div>
+  <div class="star star-position3"></div>
+  <div class="star star-position4"></div>
+  <div class="star star-position5"></div>
+  <div class="star star-position6"></div>
+  <div class="star star-position7"></div>
+</div>
+<div class="box-of-star3">
+  <div class="star star-position1"></div>
+  <div class="star star-position2"></div>
+  <div class="star star-position3"></div>
+  <div class="star star-position4"></div>
+  <div class="star star-position5"></div>
+  <div class="star star-position6"></div>
+  <div class="star star-position7"></div>
+</div>
+<div class="box-of-star4">
+  <div class="star star-position1"></div>
+  <div class="star star-position2"></div>
+  <div class="star star-position3"></div>
+  <div class="star star-position4"></div>
+  <div class="star star-position5"></div>
+  <div class="star star-position6"></div>
+  <div class="star star-position7"></div>
+</div>
+
+<div id="computer">
+  <div id="side"></div>
+  <div id="top"></div>
+  <div id="front"></div>
+  <div id="screen"></div>
+  <div id="text">
+    <div>$&nbsp;L&#8203;O&#8203;F&#8203;:&#8203;</div>
+    <div>L&#8203;A&#8203;B&#8203;&#8203;&#8203;&#8203; &#8203;&#8203;&#8203; &#8203;&#8203;&#8203;&#8203;&#8203;&#8203;</div>
+    <div>O&#8203;F&#8203; &#8203;&#8203;  &#8203;&#8203;&#8203;&#8203;&#8203;&#8203;&#8203;</div>
+    <div>F&#8203;U&#8203;T&#8203;U&#8203;R&#8203;E&#8203;&#8203;&#8203;&#8203;&#8203;&#8203;&#8203;&#8203;&#8203;&#8203; </div>
+  </div>
+  <div id="button"></div></div>
+  
+<div style = "color : white; align-self: center;" > 
+  <h2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Question {{ question_num }} of 20</h2>
+    <p> <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{{ scenario['scenario'] }}</p>
+    
+    <form method="POST">
+      
+        {% for index in range(scenario['options']|length) %}
+            <input type="radio" name="option" value="{{ index }}" required> {{ scenario['options'][index] }}<br>
+        {% endfor %}
+        <button type="submit">Next Question</button>
+    </form>
+
+    <h3>Trust Meter: {{ trust_score }}</h3>
+    <div class="meter">
+        <div class="meter-fill"></div>
+    </div>
+
+
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+
+
+</body>
+</html>
+

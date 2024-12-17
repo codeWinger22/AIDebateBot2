@@ -1,0 +1,45 @@
+Here's an evaluation of the user arguments based on your criteria:
+
+**Total arguments:** 5
+
+**Relevant arguments:**
+
+* "I think animals should be kept in zoo because they give them a secure environment" - Relevant.  This directly addresses the potential welfare of animals in zoos.
+* "I think animals should be kept inside it" -  Potentially relevant, depending on the interpretation of "it".  If "it" refers to a zoo or sanctuary, it's relevant. If it means a cage or house, it is less relevant and its relevance depends on the context of the zoo debate.  Let's consider it partially relevant for now.
+* "I feel animal should be kept in zoo because it gives the secure and safe environment" - Relevant. This is a reiteration of the first relevant argument, but we are ignoring deliberate repetitions.
+
+
+**Relevant arguments count:** 2 (or potentially 3 if "kept inside it" refers to a zoo-like environment)
+
+**Percentage of relevant arguments:** 40% (or potentially 60% )
+
+**'Yes' if relevant percentage >= 60%, otherwise 'No':** No
+
+
+**Note:**  The ambiguity of "I think animals should be kept inside it" makes the analysis somewhat subjective.  A clearer statement of the intended meaning would improve the evaluation.  A more definitive answer can be provided if there's a more specific context.
+127.0.0.1 - - [01/Dec/2024 12:33:14] "GET /end_debate HTTP/1.1" 200 -
+Here's an evaluation of the user arguments based on your criteria:
+
+**Total arguments:** 5
+
+**Relevant arguments:**
+
+* **User 3:** "I think animals should be kept in zoo because they give them a secure environment" - This argument directly addresses the likely debate topic of animal welfare/captivity in zoos.  It is relevant.
+
+* **User 5:** "I feel animal should be kept in zoo because it gives the secure and safe environment" -  This is a repetition of argument 3, so according to the criteria, is not relevant.
+
+
+**Relevant arguments count:** 1
+
+**Percentage of relevant arguments:** (1/5) * 100% = 20%
+
+**Relevant percentage >= 60%?** No
+
+**Output:**
+
+- Total arguments: 5
+- Relevant arguments count: 1
+- Percentage of relevant arguments: 20%
+- 'Yes' if relevant percentage >= 60%, otherwise 'No': No
+127.0.0.1 - - [01/Dec/2024 12:33:16] "GET /end_debate HTTP/1.1" 206 -
+127.0.0.1 - - [01/Dec/2024 12:33:16] "GET /favicon.ico HTTP/1.1" 404 -

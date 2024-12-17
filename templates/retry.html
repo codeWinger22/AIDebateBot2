@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retry Quiz</title>
+</head>
+<body>
+    <h1>Retry Quiz for Team {{ team_number }}</h1>
+    <h2>Age Group: {{ age_group }}</h2>
+    <p>Your current score: {{ score }}</p>
+    <p>You got some questions wrong. Try again:</p>
+
+    <form method="POST">
+        {% for question in questions %}
+        <div>
+            <label for="q{{ loop.index }}">{{ loop.index }}. {{ question.question }}</label><br>
+            <input type="text" id="q{{ loop.index }}" name="q{{ loop.index }}">
+        </div>
+        {% endfor %}
+        <button type="submit">Retry</button>
+    </form>
+</body>
+</html>
