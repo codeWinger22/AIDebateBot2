@@ -40,7 +40,101 @@ scenarios = [
         'options': ['Earth', 'Mars', 'Jupiter', 'Venus'],
         'correct': 1
     },
-    
+    {
+        'scenario': 'What is the name of our galaxy?',
+        'options': ['Andromeda', 'Milky Way', 'Sombrero', 'Whirlpool'],
+        'correct': 1
+    },
+    {
+        'scenario': 'What is the hottest planet in the solar system?',
+        'options': ['Mercury', 'Venus', 'Earth', 'Mars'],
+        'correct': 1
+    },
+    {
+        'scenario': 'Which space mission landed the first humans on the Moon?',
+        'options': ['Apollo 11', 'Challenger', 'Voyager', 'Hubble'],
+        'correct': 0
+    },
+    {
+        'scenario': 'Which planet has the most moons?',
+        'options': ['Mars', 'Earth', 'Jupiter', 'Saturn'],
+        'correct': 3
+    },
+    {
+        'scenario': 'Which planet is the smallest in our solar system?',
+        'options': ['Mercury', 'Mars', 'Venus', 'Pluto'],
+        'correct': 0
+    },
+    {
+        'scenario': 'What is the shape of the Milky Way?',
+        'options': ['Elliptical', 'Spiral', 'Irregular', 'Ring'],
+        'correct': 1
+    },
+    {
+        'scenario': 'What is the nearest star to Earth?',
+        'options': ['Sirius', 'Alpha Centauri', 'Sun', 'Proxima Centauri'],
+        'correct': 2
+    },
+    {
+        'scenario': 'Which planet has rings around it?',
+        'options': ['Earth', 'Mars', 'Saturn', 'Venus'],
+        'correct': 2
+    },
+    {
+        'scenario': 'What is the largest planet in our solar system?',
+        'options': ['Earth', 'Jupiter', 'Saturn', 'Neptune'],
+        'correct': 1
+    },
+    {
+        'scenario': 'Which star is at the center of our solar system?',
+        'options': ['Polaris', 'Sirius', 'Sun', 'Alpha Centauri'],
+        'correct': 2
+    },
+    {
+        'scenario': 'What is the primary gas in the Earth\'s atmosphere?',
+        'options': ['Oxygen', 'Nitrogen', 'Carbon Dioxide', 'Argon'],
+        'correct': 1
+    },
+    {
+        'scenario': 'What is the closest planet to the Sun?',
+        'options': ['Mercury', 'Venus', 'Earth', 'Mars'],
+        'correct': 0
+    },
+    {
+        'scenario': 'Which planet is famous for its Great Red Spot?',
+        'options': ['Earth', 'Mars', 'Jupiter', 'Saturn'],
+        'correct': 2
+    },
+    {
+        'scenario': 'Which planet is tilted on its side?',
+        'options': ['Neptune', 'Saturn', 'Uranus', 'Jupiter'],
+        'correct': 2
+    },
+    {
+        'scenario': 'Which mission discovered water on the Moon?',
+        'options': ['Apollo 12', 'Chandrayaan-1', 'Viking 1', 'Pioneer 10'],
+        'correct': 1
+    },
+    {
+        'scenario': 'What is the name of the first artificial satellite?',
+        'options': ['Sputnik 1', 'Explorer 1', 'Vostok 1', 'Voyager 1'],
+        'correct': 0
+    },
+    {
+        'scenario': 'Which spacecraft has traveled the farthest from Earth?',
+        'options': ['Voyager 1', 'Pioneer 10', 'New Horizons', 'Hubble Telescope'],
+        'correct': 0
+    },
+    {
+        'scenario': 'What is the main component of the Sun?',
+        'options': ['Hydrogen', 'Helium', 'Oxygen', 'Carbon'],
+        'correct': 0
+    },
+    {
+        'scenario': 'What is the approximate age of the solar system?',
+        'options': ['4.6 billion years', '3.8 billion years', '5.2 billion years', '2.4 billion years'],
+        'correct': 0
+    }
 ]
 
 
@@ -275,23 +369,25 @@ def end_debate():
         lines = relevance_response.splitlines()
         prompt = "based on this relevance response just answer in word who is the winner, user or bot or NoWinner. just answer in one word bot , user no winner"
 # Check the first line for "Yes" or "No"
-        relevance_response = model.generate_content(relevance_prompt).text.strip()
-        print(relevance_response)
-        for line in lines:
-            print(line)
-            if "user" in line:
+        relevance_response = model.generate_content(prompt).text.strip()
+        print("this is the answ",relevance_response)
+        
+        if relevance_response=="NoWinner":
                 
-                winner = "User"
-                break
-            elif "bot" in line:
-                winner = "Bot"
-                break
-            else :
-                winner = "No Winner"
+            winner = "No Winner"
+               
+            
+        elif relevance_response == "bot" or relevance_response == "Bot":
+            winner = "Bot"
+            
+        else :
+            winner = "User"
+            winner = f"The winner is: {winner}."
+            
         
         # Generate winner announcement audio
         print(winner)
-        winner = f"The winner is: {winner}."
+        
         return render_template('winner.html', topic=topic, winner=winner, evaluation=relevance_response)
 
     
